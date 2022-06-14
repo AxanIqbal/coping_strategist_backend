@@ -5,6 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import * as Joi from 'joi';
 
+let extraSsl;
+
+if (process.env.NODE_ENV === 'production') {
+  extraSsl = {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  };
+}
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,11 +32,9 @@ import * as Joi from 'joi';
       url: process.env.DATABASE_URL,
       synchronize: true,
       autoLoadEntities: true,
-      ssl: true,
+      ssl: process.env.NODE_ENV === 'production',
       extra: {
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        ...extraSsl,
       },
     }),
     AuthModule,

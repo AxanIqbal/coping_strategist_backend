@@ -13,6 +13,13 @@ import { LocalStrategy } from './strategies/local.strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.SECRET,
+      signOptions: {
+        expiresIn: '1d',
+        algorithm: 'HS384',
+      },
+      verifyOptions: {
+        algorithms: ['HS384'],
+      },
     }),
   ],
   providers: [AuthService, JwtStrategy, LocalStrategy],

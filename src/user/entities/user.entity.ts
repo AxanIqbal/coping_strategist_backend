@@ -1,7 +1,16 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { Exclude } from 'class-transformer';
 
 export enum UserRole {
   client = 'client',
@@ -24,27 +33,29 @@ export class User {
 
   @Column()
   @IsString()
+  @Exclude()
   password: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
 
   @BeforeInsert()
-  async hashPassword() {
-    try {
-      this.password = await bcrypt.hash(this.password, 10);
-    } catch (e) {
-      console.log(e);
-      throw new InternalServerErrorException();
+  @BeforeUpdate()
+  async hashPassword(): Promise<void> {
+    const salt = await bcrypt.genSalt();
+    if (!/^\$2a\$\d+\$/.test(this.password)) {
+      this.password = await bcrypt.hash(this.password, salt);
     }
   }
 
-  async checkPassword(aPassword: string): Promise<boolean> {
-    try {
-      return await bcrypt.compare(aPassword, this.password);
-    } catch (e) {
-      return false;
-    }
+  async checkPassword(plainPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, this.password);
   }
 }
