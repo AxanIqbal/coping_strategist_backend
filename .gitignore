@@ -41,6 +41,5 @@ lerna-debug.log*
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
-yarn.lock
 
 .env
