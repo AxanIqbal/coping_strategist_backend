@@ -23,6 +23,7 @@ import * as Joi from 'joi';
       url: process.env.DATABASE_URL,
       synchronize: true,
       autoLoadEntities: true,
+      ssl: true,
     }),
     AuthModule,
     UserModule,
