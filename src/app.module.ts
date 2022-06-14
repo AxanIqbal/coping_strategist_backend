@@ -24,6 +24,11 @@ import * as Joi from 'joi';
       synchronize: true,
       autoLoadEntities: true,
       ssl: true,
+      extra: {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
     }),
     AuthModule,
     UserModule,
