@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
+import admin from 'firebase-admin';
 
 @Injectable()
 export class UserService {
@@ -11,7 +11,7 @@ export class UserService {
     @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
-  async create(createUserInput: CreateUserDto) {
+  async create(createUserInput: Partial<User>): Promise<HttpException | User> {
     try {
       const exists = await this.users.findOne({
         where: [
@@ -22,10 +22,7 @@ export class UserService {
       if (exists) {
         return new HttpException('Already Exists', HttpStatus.FOUND);
       }
-      const user = await this.users.save(this.users.create(createUserInput));
-      return {
-        user,
-      };
+      return await this.users.save(this.users.create(createUserInput));
     } catch (e) {
       console.log(e);
       return new HttpException(

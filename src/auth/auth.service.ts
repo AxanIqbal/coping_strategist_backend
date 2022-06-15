@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../user/entities/user.entity';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,6 +12,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
   ) {}
+
+  async register(signUp: SignUpDto): Promise<User> {
+    const user = await this.userService.create(signUp);
+    if (user instanceof HttpException) {
+      throw user;
+    }
+
+    delete user.password;
+
+    return user;
+  }
 
   async validateUser(username: string, password: string) {
     const user = await this.userService.findOne(username);
@@ -20,12 +33,13 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload, {
-        secret: this.config.get<string>('SECRET'),
-      }),
+  signToken(user: User): string {
+    const payload = {
+      sub: user.email,
     };
+
+    return this.jwtService.sign(payload, {
+      secret: this.config.get<string>('SECRET'),
+    });
   }
 }

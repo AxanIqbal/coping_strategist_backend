@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
+import { ClinicModule } from './clinic/clinic.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -23,6 +24,7 @@ import * as Joi from 'joi';
       url: process.env.DATABASE_URL,
       synchronize: true,
       autoLoadEntities: true,
+      logging: true,
       ssl: process.env.NODE_ENV === 'production',
       extra: {
         ssl:
@@ -35,6 +37,7 @@ import * as Joi from 'joi';
     }),
     AuthModule,
     UserModule,
+    ClinicModule,
   ],
   controllers: [],
   providers: [],

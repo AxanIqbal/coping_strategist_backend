@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { IsEmail, IsEnum, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 import { Exclude } from 'class-transformer';
 
 export enum UserRole {
@@ -45,6 +45,10 @@ export class User {
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
+
+  @Column()
+  @IsUrl()
+  profileUrl: string;
 
   @BeforeInsert()
   @BeforeUpdate()
