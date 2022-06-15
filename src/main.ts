@@ -17,7 +17,7 @@ async function bootstrap() {
       clientEmail: configService.get<string>('FIREBASE_CLIENT_EMAIL'),
     }),
   });
-  // app.enableCors();
+  app.enableCors();
   await app.listen(configService.get('PORT') || 3000);
 }
 bootstrap();
