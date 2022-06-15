@@ -16,6 +16,7 @@ import { TokenInterceptor } from './interceptor/token.interceptor';
 import { AuthUser } from '../user/decorator/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { SignUpDto } from './dto/sign-up.dto';
+import { SessionAuthGuard } from './guards/session-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -36,9 +37,10 @@ export class AuthController {
     return this.authService.register(signUp);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
+  @UseGuards(SessionAuthGuard)
+  @Get('me')
   getProfile(@Request() req) {
+    console.log(req);
     return req.user;
   }
 }

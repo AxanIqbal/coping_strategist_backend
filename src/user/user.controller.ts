@@ -12,14 +12,16 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
+import { User } from './entities/user.entity';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard)
+@UseGuards(SessionAuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
+  findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
@@ -29,6 +31,7 @@ export class UserController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    delete user.password;
     return user;
   }
 
