@@ -5,16 +5,13 @@ import {
   Entity,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Point } from 'geojson';
-import {
-  IsDateString,
-  IsNotEmpty,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ClinicTimings } from './clinic.timings.entity';
+import { ClinicPicturesEntity } from './clinic.pictures.entity';
 
 @Entity()
 export class Clinic {
@@ -47,4 +44,14 @@ export class Clinic {
   @IsNotEmpty()
   @Type(() => ClinicTimings)
   timings: ClinicTimings;
+
+  @OneToMany(() => ClinicPicturesEntity, (object) => object.clinic, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  @JoinColumn()
+  @ValidateNested({ each: true })
+  @Type(() => Array<ClinicPicturesEntity>)
+  pictures: ClinicPicturesEntity[];
 }

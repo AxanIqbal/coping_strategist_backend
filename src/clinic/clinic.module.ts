@@ -4,9 +4,12 @@ import { ClinicController } from './clinic.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Clinic } from './entities/clinic.entity';
 import { ClinicTimings } from './entities/clinic.timings.entity';
+import { ClinicPicturesEntity } from './entities/clinic.pictures.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ClinicTimings, Clinic])],
+  imports: [
+    TypeOrmModule.forFeature([ClinicTimings, ClinicPicturesEntity, Clinic]),
+  ],
   controllers: [ClinicController],
   providers: [ClinicService],
 })
