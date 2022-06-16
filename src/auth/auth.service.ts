@@ -27,11 +27,10 @@ export class AuthService {
 
   async validateUser(login: LoginPayload): Promise<User> {
     const user = await this.userService.findOne(login.username);
-    const passCheck = await user.checkPassword(login.password);
     if (!user) {
       throw new HttpException('User not found', 404);
     }
-    if (!passCheck) {
+    if (!(await user.checkPassword(login.password))) {
       throw new HttpException('Cred does not match', HttpStatus.BAD_REQUEST);
     }
 
