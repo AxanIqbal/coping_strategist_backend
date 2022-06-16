@@ -3,7 +3,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
-import admin from 'firebase-admin';
 
 @Injectable()
 export class UserService {

@@ -8,15 +8,19 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  Patch,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { User } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthUser } from './decorator/user.decorator';
 
 @Controller('user')
 @UseGuards(SessionAuthGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -31,14 +35,16 @@ export class UserController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    delete user.password;
+
     return user;
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(+id, updateUserDto);
-  // }
+  @Patch()
+  update(@Body() updateUserDto: UpdateUserDto, @AuthUser() user: User) {
+    console.log(updateUserDto);
+    console.log(user, 'the user');
+    //   return this.userService.update(+id, updateUserDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

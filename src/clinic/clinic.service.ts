@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,7 +33,11 @@ export class ClinicService {
     return `This action updates a #${id} clinic`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} clinic`;
+  async remove(id: number) {
+    const clinic = await this.clinicRepository.findOne({ where: { id } });
+    if (!clinic) {
+      throw new HttpException('Clinic not found', 404);
+    }
+    return this.clinicRepository.remove(clinic);
   }
 }

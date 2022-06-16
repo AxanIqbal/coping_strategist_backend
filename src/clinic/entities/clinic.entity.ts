@@ -14,32 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-
-@Entity()
-export class ClinicTimings {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  @IsString()
-  monday: string;
-
-  @Column()
-  @IsString()
-  tuesday: string;
-
-  @Column()
-  @IsString()
-  wednesday: string;
-
-  @Column()
-  @IsString()
-  thursday: string;
-
-  @Column()
-  @IsString()
-  friday: string;
-}
+import { ClinicTimings } from './clinic.timings.entity';
 
 @Entity()
 export class Clinic {
@@ -63,7 +38,10 @@ export class Clinic {
   @IsString()
   details: string;
 
-  @OneToOne(() => ClinicTimings, { cascade: true, onDelete: 'CASCADE' })
+  @OneToOne(() => ClinicTimings, (object) => object.clinic, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   @ValidateNested()
   @IsNotEmpty()

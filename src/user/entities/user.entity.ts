@@ -1,4 +1,5 @@
 import {
+  AfterRemove,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -7,10 +8,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { IsEmail, IsEnum, IsString, IsUrl } from 'class-validator';
 import { Exclude } from 'class-transformer';
+import admin from 'firebase-admin';
 
 export enum UserRole {
   client = 'client',
@@ -57,6 +58,11 @@ export class User {
     if (!/^\$2a\$\d+\$/.test(this.password)) {
       this.password = await bcrypt.hash(this.password, salt);
     }
+  }
+
+  @AfterRemove()
+  async removePicture(): Promise<void> {
+    await admin.storage().bucket().file(`profiles/${this.id}`).delete();
   }
 
   async checkPassword(plainPassword: string): Promise<boolean> {
