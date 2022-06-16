@@ -4,43 +4,41 @@ import {
   UseGuards,
   Request,
   Get,
-  UseInterceptors,
   HttpCode,
   HttpStatus,
   Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
-import { TokenInterceptor } from './interceptor/token.interceptor';
-import { AuthUser } from '../user/decorator/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { SignUpDto } from './dto/sign-up.dto';
-import { SessionAuthGuard } from './guards/session-auth.guard';
+import { LoginPayload } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(AuthGuard('local'))
   @Post('login')
-  @UseInterceptors(TokenInterceptor)
   @HttpCode(HttpStatus.OK)
-  async login(@AuthUser() user: User): Promise<User> {
-    return user;
+  async login(
+    @Body() payload: LoginPayload,
+  ): Promise<{ accessToken: string; user: User }> {
+    const user = await this.authService.validateUser(payload);
+    return this.authService.createToken(user);
   }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(TokenInterceptor)
-  register(@Body() signUp: SignUpDto): Promise<User> {
-    return this.authService.register(signUp);
+  async register(
+    @Body() signUp: SignUpDto,
+  ): Promise<{ accessToken: string; user: User }> {
+    const user = await this.authService.register(signUp);
+    return this.authService.createToken(user);
   }
 
-  @UseGuards(SessionAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    console.log(req);
+  getProfile(@Request() req): Promise<User> {
     return req.user;
   }
 }

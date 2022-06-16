@@ -1,9 +1,10 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../user/entities/user.entity';
 import { SignUpDto } from './dto/sign-up.dto';
+import { LoginPayload } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,18 +25,32 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(username: string, password: string) {
-    const user = await this.userService.findOne(username);
-    if (user && (await user.checkPassword(password))) {
-      const { password, ...result } = user;
-      return result;
+  async validateUser(login: LoginPayload): Promise<User> {
+    const user = await this.userService.findOne(login.username);
+    const passCheck = await user.checkPassword(login.password);
+    if (!user) {
+      throw new HttpException('User not found', 404);
     }
-    return null;
+    if (!passCheck) {
+      throw new HttpException('Cred does not match', HttpStatus.BAD_REQUEST);
+    }
+
+    delete user.password;
+
+    return user;
+  }
+
+  async createToken(user: User) {
+    return {
+      accessToken: this.jwtService.sign({ id: user.id }),
+      user,
+    };
   }
 
   signToken(user: User): string {
     const payload = {
       sub: user.email,
+      username: user.username,
     };
 
     return this.jwtService.sign(payload, {

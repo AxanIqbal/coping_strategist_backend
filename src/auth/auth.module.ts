@@ -13,17 +13,17 @@ import { SessionSerializer } from './session.serializer';
 @Module({
   imports: [
     UserModule,
-    JwtModule.register({
-      secret: process.env.SECRET,
-      signOptions: {
-        expiresIn: '1d',
-        algorithm: 'HS384',
-      },
-      verifyOptions: {
-        algorithms: ['HS384'],
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          secret: process.env.SECRET,
+          signOptions: {
+            expiresIn: '1d',
+          },
+        };
       },
     }),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   providers: [
     AuthService,
