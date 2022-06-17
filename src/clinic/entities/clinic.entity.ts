@@ -9,9 +9,10 @@ import {
 } from 'typeorm';
 import { Point } from 'geojson';
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
-import { Expose, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ClinicTimings } from './clinic.timings.entity';
 import { ClinicPicturesEntity } from './clinic.pictures.entity';
+import { ClinicAppointments } from './clinic.appointments.entity';
 
 @Entity()
 export class Clinic {
@@ -37,9 +38,7 @@ export class Clinic {
 
   @OneToOne(() => ClinicTimings, (object) => object.clinic, {
     cascade: true,
-    onDelete: 'CASCADE',
   })
-  @JoinColumn()
   @ValidateNested()
   @IsNotEmpty()
   @Type(() => ClinicTimings)
@@ -47,13 +46,15 @@ export class Clinic {
 
   @OneToMany(() => ClinicPicturesEntity, (object) => object.clinic, {
     cascade: true,
-    onDelete: 'CASCADE',
     eager: true,
   })
   @JoinColumn()
   @ValidateNested({ each: true })
   @Type(() => Array<ClinicPicturesEntity>)
   pictures: ClinicPicturesEntity[];
+
+  @OneToMany(() => ClinicAppointments, (object) => object.clinic)
+  appointments: ClinicAppointments[];
 
   distance?: number;
 }

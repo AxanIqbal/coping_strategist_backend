@@ -5,6 +5,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { IsEmail, IsEnum, IsString, IsUrl } from 'class-validator';
 import { Exclude } from 'class-transformer';
 import admin from 'firebase-admin';
+import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
 
 export enum UserRole {
   client = 'client',
@@ -50,6 +53,9 @@ export class User {
   @Column()
   @IsUrl()
   profileUrl: string;
+
+  @OneToMany(() => ClinicAppointments, (object) => object.patient)
+  appointments: ClinicAppointments[];
 
   @BeforeInsert()
   @BeforeUpdate()

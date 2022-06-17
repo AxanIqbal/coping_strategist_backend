@@ -1,5 +1,11 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { IsString } from 'class-validator';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { IsDateString, IsString } from 'class-validator';
 import { Clinic } from './clinic.entity';
 
 @Entity()
@@ -7,8 +13,14 @@ export class ClinicTimings {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @OneToOne(() => Clinic, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  clinic: Clinic;
+
   @Column()
-  @IsString()
+  @IsDateString()
   monday: string;
 
   @Column()
@@ -26,7 +38,4 @@ export class ClinicTimings {
   @Column()
   @IsString()
   friday: string;
-
-  @OneToOne(() => Clinic, (object) => object.timings, { onDelete: 'CASCADE' })
-  clinic: Clinic;
 }

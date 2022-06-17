@@ -11,6 +11,6 @@ export class ClinicPicturesEntity {
   @IsUrl()
   url: string;
 
-  @ManyToOne(() => Clinic, (object) => object.pictures)
+  @ManyToOne(() => Clinic, (object) => object.pictures, { onDelete: 'CASCADE' })
   clinic: Clinic;
 }

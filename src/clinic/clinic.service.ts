@@ -18,7 +18,11 @@ export class ClinicService {
     );
   }
 
-  async findAll(radius: number, latitude?: number, longitude?: number) {
+  async findAll(
+    radius: number,
+    latitude?: number,
+    longitude?: number,
+  ): Promise<Clinic[]> {
     if (latitude && longitude) {
       const raw_entity = await this.clinicRepository
         .createQueryBuilder('clinic')
