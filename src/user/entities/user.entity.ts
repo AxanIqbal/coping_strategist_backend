@@ -68,7 +68,7 @@ export class User {
 
   @AfterRemove()
   async removePicture(): Promise<void> {
-    await admin.storage().bucket().file(`profiles/${this.id}`).delete();
+    await admin.storage().bucket().file(`profiles/${this.username}`).delete();
   }
 
   async checkPassword(plainPassword: string): Promise<boolean> {

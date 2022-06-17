@@ -1,20 +1,40 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { CreateClinicDto } from './dto/create-clinic.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CreateAppointmentDto, CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clinic } from './entities/clinic.entity';
 import { Repository } from 'typeorm';
+import { ClinicAppointments } from './entities/clinic.appointments.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class ClinicService {
   constructor(
     @InjectRepository(Clinic)
     private readonly clinicRepository: Repository<Clinic>,
+    @InjectRepository(ClinicAppointments)
+    private readonly appointmentRepository: Repository<ClinicAppointments>,
   ) {}
 
   create(createClinicDto: CreateClinicDto) {
     return this.clinicRepository.save(
       this.clinicRepository.create(createClinicDto),
+    );
+  }
+
+  async createAppointment(createAppointment: CreateAppointmentDto, user: User) {
+    const clinic = await this.clinicRepository.findOne({
+      where: { id: createAppointment.clinic },
+    });
+    if (!clinic) {
+      throw new HttpException('Clinic not found', HttpStatus.NOT_FOUND);
+    }
+    return this.appointmentRepository.save(
+      this.appointmentRepository.create({
+        date: createAppointment.date,
+        patient: user,
+        clinic: clinic,
+      }),
     );
   }
 

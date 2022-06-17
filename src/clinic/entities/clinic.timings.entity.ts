@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IsDateString, IsString } from 'class-validator';
+import { IsDate, IsDateString, IsString } from 'class-validator';
 import { Clinic } from './clinic.entity';
 
 @Entity()
@@ -20,7 +20,7 @@ export class ClinicTimings {
   clinic: Clinic;
 
   @Column()
-  @IsDateString()
+  @IsString()
   monday: string;
 
   @Column()

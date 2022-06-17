@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -10,11 +11,15 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
-import { CreateClinicDto } from './dto/create-clinic.dto';
+import { CreateAppointmentDto, CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ClinicAppointments } from './entities/clinic.appointments.entity';
+import { AuthUser } from '../user/decorator/user.decorator';
+import { User } from '../user/entities/user.entity';
 
 @Controller('clinic')
 @UseGuards(JwtAuthGuard)
@@ -28,6 +33,15 @@ export class ClinicController {
       coordinates: [createClinicDto.longitude, createClinicDto.latitude],
     };
     return this.clinicService.create(createClinicDto);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('appointment')
+  createAppointment(
+    @Body() createAppointment: CreateAppointmentDto,
+    @AuthUser() user: User,
+  ) {
+    return this.clinicService.createAppointment(createAppointment, user);
   }
 
   @Get()

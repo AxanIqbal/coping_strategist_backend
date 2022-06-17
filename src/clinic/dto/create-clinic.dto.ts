@@ -1,5 +1,7 @@
 import { Clinic } from '../entities/clinic.entity';
-import { IsLatitude, IsLongitude } from 'class-validator';
+import { IsLatitude, IsLongitude, IsNumber, IsPositive } from 'class-validator';
+import { PickType } from '@nestjs/mapped-types';
+import { ClinicAppointments } from '../entities/clinic.appointments.entity';
 
 export class CreateClinicDto extends Clinic {
   @IsLongitude()
@@ -7,4 +9,11 @@ export class CreateClinicDto extends Clinic {
 
   @IsLatitude()
   latitude: number;
+}
+
+export class CreateAppointmentDto extends PickType(ClinicAppointments, [
+  'date',
+]) {
+  @IsNumber()
+  clinic: number;
 }
