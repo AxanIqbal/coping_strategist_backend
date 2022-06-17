@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Point } from 'geojson';
 import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { ClinicTimings } from './clinic.timings.entity';
 import { ClinicPicturesEntity } from './clinic.pictures.entity';
 
@@ -54,4 +54,6 @@ export class Clinic {
   @ValidateNested({ each: true })
   @Type(() => Array<ClinicPicturesEntity>)
   pictures: ClinicPicturesEntity[];
+
+  distance?: number;
 }

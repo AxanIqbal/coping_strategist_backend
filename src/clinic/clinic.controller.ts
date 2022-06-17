@@ -3,9 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  Optional,
   Param,
+  ParseFloatPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
@@ -28,8 +31,12 @@ export class ClinicController {
   }
 
   @Get()
-  findAll() {
-    return this.clinicService.findAll();
+  findAll(
+    @Query('latitude') latitude?: number,
+    @Query('longitude') longitude?: number,
+    @Query('radius') radius = 50,
+  ) {
+    return this.clinicService.findAll(radius, latitude, longitude);
   }
 
   @Get(':id')
