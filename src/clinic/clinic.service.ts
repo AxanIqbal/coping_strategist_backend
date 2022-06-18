@@ -76,11 +76,13 @@ export class ClinicService {
             search: `${formattedQuery}:*`,
           },
         )
+        .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity')
         .getMany();
     }
     return this.clinicRepository
       .createQueryBuilder('clinic')
       .limit(50)
+      .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity')
       .getMany();
   }
 
