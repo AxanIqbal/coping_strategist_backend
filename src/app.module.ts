@@ -22,7 +22,8 @@ import * as Joi from 'joi';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      synchronize: true,
+      synchronize: false,
+      uuidExtension: 'pgcrypto',
       autoLoadEntities: true,
       logging: true,
       ssl: process.env.NODE_ENV === 'production',

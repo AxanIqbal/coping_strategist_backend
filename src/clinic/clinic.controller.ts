@@ -49,8 +49,9 @@ export class ClinicController {
     @Query('latitude') latitude?: number,
     @Query('longitude') longitude?: number,
     @Query('radius') radius = 50,
+    @Query('search') search?: string,
   ) {
-    return this.clinicService.findAll(radius, latitude, longitude);
+    return this.clinicService.findAll(radius, search, latitude, longitude);
   }
 
   @Get(':id')

@@ -40,6 +40,7 @@ export class ClinicService {
 
   async findAll(
     radius: number,
+    search?: string,
     latitude?: number,
     longitude?: number,
   ): Promise<Clinic[]> {
@@ -64,17 +65,23 @@ export class ClinicService {
       }
 
       return raw_entity.entities;
-      // return this.clinicRepository.query(
-      //   `SELECT * ,
-      //  ST_Distance(location, ST_MakePoint(${longitude}, ${latitude})) AS distance
-      //   FROM clinic LEFT JOIN clinic_pictures_entity on clinic_pictures_entity.clinicId=clinic.id
-      //   WHERE ST_DWithin(location, ST_MakePoint(${longitude}, ${latitude}), ${radius} * 1000) ORDER BY distance;`,
-      // );
-      // return this.clinicRepository.query(
-      //   `SELECT * , ST_Distance(ST_MakePoint(${longitude}, ${latitude} ), location) AS distance FROM clinic ORDER BY distance;`,
-      // );
     }
-    return this.clinicRepository.find();
+    if (search) {
+      const formattedQuery = search.trim().replace(/ /g, ' & ');
+      return this.clinicRepository
+        .createQueryBuilder('clinic')
+        .where(
+          `to_tsvector('english',clinic.name) @@ to_tsquery('english', :search)`,
+          {
+            search: `${formattedQuery}:*`,
+          },
+        )
+        .getMany();
+    }
+    return this.clinicRepository
+      .createQueryBuilder('clinic')
+      .limit(50)
+      .getMany();
   }
 
   findOne(id: number) {
