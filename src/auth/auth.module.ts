@@ -9,6 +9,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
 import { SessionSerializer } from './session.serializer';
+import { FavoriteController } from '../user/favorite.controller';
 
 @Module({
   imports: [

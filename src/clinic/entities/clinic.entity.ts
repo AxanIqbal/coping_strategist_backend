@@ -3,16 +3,15 @@ import {
   Index,
   PrimaryGeneratedColumn,
   Entity,
-  OneToOne,
   JoinColumn,
   OneToMany,
 } from 'typeorm';
 import { Point } from 'geojson';
-import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ClinicTimings } from './clinic.timings.entity';
 import { ClinicPicturesEntity } from './clinic.pictures.entity';
 import { ClinicAppointments } from './clinic.appointments.entity';
+import { DoctorEntity } from '../../user/entities/doctor.entity';
 
 @Entity()
 export class Clinic {
@@ -36,13 +35,16 @@ export class Clinic {
   @IsString()
   details: string;
 
-  @OneToOne(() => ClinicTimings, (object) => object.clinic, {
-    cascade: true,
-  })
-  @ValidateNested()
-  @IsNotEmpty()
-  @Type(() => ClinicTimings)
-  timings: ClinicTimings;
+  @OneToMany(() => DoctorEntity, (object) => object.clinic)
+  doctors: DoctorEntity[];
+
+  // @OneToOne(() => ClinicTimings, (object) => object.clinic, {
+  //   cascade: true,
+  // })
+  // @ValidateNested()
+  // @IsNotEmpty()
+  // @Type(() => ClinicTimings)
+  // timings: ClinicTimings;
 
   @OneToMany(() => ClinicPicturesEntity, (object) => object.clinic, {
     cascade: true,

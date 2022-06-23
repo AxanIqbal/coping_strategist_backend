@@ -18,5 +18,6 @@ import { ClinicAppointments } from './entities/clinic.appointments.entity';
   ],
   controllers: [ClinicController],
   providers: [ClinicService],
+  exports: [ClinicService],
 })
 export class ClinicModule {}

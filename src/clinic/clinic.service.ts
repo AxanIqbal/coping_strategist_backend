@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { CreateAppointmentDto, CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -23,19 +28,35 @@ export class ClinicService {
   }
 
   async createAppointment(createAppointment: CreateAppointmentDto, user: User) {
-    const clinic = await this.clinicRepository.findOne({
-      where: { id: createAppointment.clinic },
-    });
-    if (!clinic) {
-      throw new HttpException('Clinic not found', HttpStatus.NOT_FOUND);
-    }
-    return this.appointmentRepository.save(
-      this.appointmentRepository.create({
+    const appointment = await this.appointmentRepository.findOne({
+      where: {
+        doctor: { id: createAppointment.doctor },
         date: createAppointment.date,
-        patient: user,
-        clinic: clinic,
-      }),
-    );
+      },
+    });
+
+    if (appointment) {
+      throw new ConflictException('Appointment exists in that time');
+    }
+
+    return this.appointmentRepository
+      .save(
+        this.appointmentRepository.create({
+          date: createAppointment.date,
+          patient: user,
+          clinic: { id: createAppointment.clinic },
+          doctor: {
+            id: createAppointment.doctor,
+          },
+        }),
+      )
+      .catch((reason) => {
+        if (reason.code === '23503') {
+          throw new ConflictException('Clinic or Doctor does not exists');
+        } else {
+          throw new Error(reason);
+        }
+      });
   }
 
   async findAll(
@@ -44,14 +65,15 @@ export class ClinicService {
     latitude?: number,
     longitude?: number,
   ): Promise<Clinic[]> {
+    const base_query = this.clinicRepository
+      .createQueryBuilder('clinic')
+      .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity');
     if (latitude && longitude) {
-      const raw_entity = await this.clinicRepository
-        .createQueryBuilder('clinic')
+      const raw_entity = await base_query
         .addSelect(
           `ST_Distance(location, ST_MakePoint(${longitude}, ${latitude}))`,
           'distance',
         )
-        .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity')
         .where(
           `ST_DWithin(location, ST_MakePoint(:longitude, :latitude), :radius * 1000)`,
           { longitude, latitude, radius },
@@ -68,28 +90,22 @@ export class ClinicService {
     }
     if (search) {
       const formattedQuery = search.trim().replace(/ /g, ' & ');
-      return this.clinicRepository
-        .createQueryBuilder('clinic')
+      return base_query
         .where(
           `to_tsvector('english',clinic.name) @@ to_tsquery('english', :search)`,
           {
             search: `${formattedQuery}:*`,
           },
         )
-        .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity')
         .getMany();
     }
-    return this.clinicRepository
-      .createQueryBuilder('clinic')
-      .limit(50)
-      .leftJoinAndSelect('clinic.pictures', 'clinic_pictures_entity')
-      .getMany();
+    return base_query.limit(50).getMany();
   }
 
   findOne(id: number) {
     return this.clinicRepository.findOne({
       where: { id },
-      relations: ['timings'],
+      relations: ['doctors'],
     });
   }
 

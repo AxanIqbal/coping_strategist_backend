@@ -6,8 +6,11 @@ import {
   IsString,
   IsUrl,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 import { UserRole } from '../../user/entities/user.entity';
+import { DoctorEntity } from '../../user/entities/doctor.entity';
+import { Type } from 'class-transformer';
 
 export class SignUpDto {
   @IsDefined()
@@ -29,4 +32,8 @@ export class SignUpDto {
 
   @IsUrl()
   profileUrl: string;
+
+  @Type(() => DoctorEntity)
+  @ValidateNested()
+  doctor?: DoctorEntity;
 }

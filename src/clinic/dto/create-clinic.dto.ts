@@ -16,4 +16,7 @@ export class CreateAppointmentDto extends PickType(ClinicAppointments, [
 ]) {
   @IsNumber()
   clinic: number;
+
+  @IsNumber()
+  doctor: number;
 }

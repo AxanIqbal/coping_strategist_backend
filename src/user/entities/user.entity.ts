@@ -5,21 +5,32 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { IsEmail, IsEnum, IsString, IsUrl } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
 import { Exclude } from 'class-transformer';
 import admin from 'firebase-admin';
 import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
+import { Clinic } from '../../clinic/entities/clinic.entity';
+import { DoctorEntity } from './doctor.entity';
 
 export enum UserRole {
   client = 'client',
   admin = 'admin',
   merchant = 'merchant',
+  doctor = 'doctor',
 }
 
 @Entity()
@@ -56,6 +67,14 @@ export class User {
 
   @OneToMany(() => ClinicAppointments, (object) => object.patient)
   appointments: ClinicAppointments[];
+
+  @ManyToMany(() => Clinic, { cascade: true })
+  @JoinTable()
+  favorites: Clinic[];
+
+  @OneToOne(() => DoctorEntity, (object) => object.user, { cascade: true })
+  @ValidateNested()
+  doctor?: DoctorEntity;
 
   @BeforeInsert()
   @BeforeUpdate()

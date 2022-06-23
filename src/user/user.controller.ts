@@ -30,6 +30,11 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('me')
+  getAllMyData(@AuthUser() user: User) {
+    return user;
+  }
+
   @Get(':username')
   async findOne(@Param('username') username: string) {
     const user = await this.userService.findOne(username);
