@@ -47,9 +47,7 @@ export class UserController {
 
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto, @AuthUser() user: User) {
-    console.log(updateUserDto);
-    console.log(user, 'the user');
-    //   return this.userService.update(+id, updateUserDto);
+    return this.userService.update(updateUserDto, user);
   }
 
   @Delete(':id')

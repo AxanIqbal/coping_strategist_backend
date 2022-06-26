@@ -1,16 +1,17 @@
 import {
+  Allow,
   IsDefined,
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsString,
   IsUrl,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { UserRole } from '../../user/entities/user.entity';
 import { DoctorEntity } from '../../user/entities/doctor.entity';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
+import { Patient } from '../../user/entities/patient.entity';
 
 export class SignUpDto {
   @IsDefined()
@@ -30,10 +31,15 @@ export class SignUpDto {
   @IsEnum(UserRole)
   readonly role: UserRole;
 
-  @IsUrl()
-  profileUrl: string;
-
   @Type(() => DoctorEntity)
   @ValidateNested()
   doctor?: DoctorEntity;
+
+  @Type(() => Patient)
+  @ValidateNested()
+  patient?: Patient;
+
+  profileUrl: Express.Multer.File;
+
+  token?: string;
 }

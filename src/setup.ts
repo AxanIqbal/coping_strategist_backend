@@ -46,6 +46,7 @@ export function setup(app: INestApplication): INestApplication {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     }),
+    storageBucket: 'coping-strategist.appspot.com',
   });
 
   app.enableCors({

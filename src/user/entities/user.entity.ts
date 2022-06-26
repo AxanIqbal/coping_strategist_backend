@@ -1,30 +1,28 @@
 import {
   AfterRemove,
   BeforeInsert,
+  BeforeRemove,
   BeforeUpdate,
   Column,
-  CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import {
+  Allow,
   IsEmail,
   IsEnum,
+  IsFirebasePushId,
   IsString,
   IsUrl,
   ValidateNested,
 } from 'class-validator';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import admin from 'firebase-admin';
-import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
-import { Clinic } from '../../clinic/entities/clinic.entity';
 import { DoctorEntity } from './doctor.entity';
+import { BaseEntity } from '../../common/entities/base.entity';
+import { Patient } from './patient.entity';
+import { Merchant } from './merchant.entity';
 
 export enum UserRole {
   client = 'client',
@@ -34,10 +32,7 @@ export enum UserRole {
 }
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class User extends BaseEntity {
   @Column({ unique: true })
   @IsEmail()
   email: string;
@@ -51,30 +46,32 @@ export class User {
   @Exclude()
   password: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
 
-  @Column()
+  @Column({ type: 'varchar' })
   @IsUrl()
-  profileUrl: string;
-
-  @OneToMany(() => ClinicAppointments, (object) => object.patient)
-  appointments: ClinicAppointments[];
-
-  @ManyToMany(() => Clinic, { cascade: true })
-  @JoinTable()
-  favorites: Clinic[];
+  profileUrl: string | Express.Multer.File;
 
   @OneToOne(() => DoctorEntity, (object) => object.user, { cascade: true })
+  @Type(() => DoctorEntity)
   @ValidateNested()
   doctor?: DoctorEntity;
+
+  @OneToOne(() => Patient, (object) => object.user, { cascade: true })
+  @Type(() => Patient)
+  @ValidateNested()
+  patient?: Patient;
+
+  @OneToOne(() => Merchant, (object) => object.user, { cascade: true })
+  @Type(() => Merchant)
+  @ValidateNested()
+  merchant: Merchant;
+
+  @Column({ nullable: true })
+  @Allow()
+  token?: string;
 
   @BeforeInsert()
   @BeforeUpdate()
@@ -83,11 +80,24 @@ export class User {
     if (!/^\$2a\$\d+\$/.test(this.password)) {
       this.password = await bcrypt.hash(this.password, salt);
     }
+    if (typeof this.profileUrl !== 'string') {
+      const bucket = admin
+        .storage()
+        .bucket()
+        .file(`profiles/${this.username}/profile.png`);
+      await bucket.save(this.profileUrl.buffer);
+      await bucket.makePublic();
+      this.profileUrl = bucket.publicUrl();
+    }
   }
 
-  @AfterRemove()
+  @BeforeRemove()
   async removePicture(): Promise<void> {
-    await admin.storage().bucket().file(`profiles/${this.username}`).delete();
+    await admin
+      .storage()
+      .bucket()
+      .file(`profiles/${this.username}/profile.png`)
+      .delete({ ignoreNotFound: true });
   }
 
   async checkPassword(plainPassword: string): Promise<boolean> {

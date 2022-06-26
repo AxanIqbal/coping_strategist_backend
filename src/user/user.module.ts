@@ -8,9 +8,23 @@ import { ClinicModule } from '../clinic/clinic.module';
 import { DoctorEntity } from './entities/doctor.entity';
 import { DoctorController } from './doctor.controller';
 import { FavoriteController } from './favorite.controller';
+import { Licence } from './entities/licence.entity';
+import { Patient } from './entities/patient.entity';
+import { FileEntity } from './entities/file.entity';
+import { Merchant } from './entities/merchant.entity';
 
 @Module({
-  imports: [ClinicModule, TypeOrmModule.forFeature([User, DoctorEntity])],
+  imports: [
+    ClinicModule,
+    TypeOrmModule.forFeature([
+      User,
+      DoctorEntity,
+      Licence,
+      Patient,
+      FileEntity,
+      Merchant,
+    ]),
+  ],
   controllers: [UserController, DoctorController, FavoriteController],
   providers: [UserService, IsUserAlreadyExist],
   exports: [UserService],

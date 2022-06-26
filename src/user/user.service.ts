@@ -12,6 +12,8 @@ import { CreateFavDto } from './dto/create-fav.dto';
 import { ClinicService } from '../clinic/clinic.service';
 import { SignUpDto } from '../auth/dto/sign-up.dto';
 import { DoctorEntity } from './entities/doctor.entity';
+import admin from 'firebase-admin';
+import { Merchant } from './entities/merchant.entity';
 
 @Injectable()
 export class UserService {
@@ -19,31 +21,44 @@ export class UserService {
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(DoctorEntity)
     private readonly doctorEntityRepository: Repository<DoctorEntity>,
+    @InjectRepository(Merchant)
+    private readonly merchantRepository: Repository<Merchant>,
     private readonly clinicService: ClinicService,
   ) {}
 
-  async create(createUserInput: SignUpDto): Promise<HttpException | User> {
+  async create(createUserInput: SignUpDto): Promise<User> {
     if (createUserInput.role !== UserRole.doctor) {
       delete createUserInput.doctor;
     }
-    try {
-      const exists = await this.users.findOne({
-        where: [
-          { email: createUserInput.email },
-          { username: createUserInput.username },
-        ],
+    const currUser = await this.users.findOne({
+      where: [
+        { username: createUserInput.username },
+        { email: createUserInput.email },
+      ],
+    });
+
+    if (currUser) {
+      throw new ConflictException('User Already Exists');
+    }
+
+    const user = await this.users
+      .save(this.users.create(createUserInput))
+      .catch((reason) => {
+        if (reason.code === '23505') {
+          throw new ConflictException('User Already Exists');
+        } else {
+          throw new Error(reason);
+        }
       });
-      if (exists) {
-        return new HttpException('Already Exists', HttpStatus.FOUND);
-      }
-      return await this.users.save(this.users.create(createUserInput));
-    } catch (e) {
-      console.log(e);
-      return new HttpException(
-        "Couldn't create account",
-        HttpStatus.INTERNAL_SERVER_ERROR,
+    if (user.role === UserRole.merchant) {
+      await this.merchantRepository.save(
+        this.merchantRepository.create({
+          user,
+        }),
       );
     }
+
+    return user;
   }
 
   findAll(): Promise<User[]> {
@@ -53,8 +68,9 @@ export class UserService {
   findOne(username: string, isMe = false): Promise<User> {
     const relations = [];
     if (isMe) {
-      relations.push('appointments');
-      relations.push('favorites');
+      relations.push('doctor');
+      relations.push('patient');
+      relations.push('merchant');
     }
     return this.users.findOne({ where: { username }, relations });
   }
@@ -63,8 +79,8 @@ export class UserService {
     return this.users.findOne({ where: { email } });
   }
 
-  update(updateUserInput: UpdateUserDto): Promise<UpdateResult> {
-    return this.users.update({ id: updateUserInput.id }, updateUserInput);
+  update(updateUserInput: UpdateUserDto, user: User): Promise<UpdateResult> {
+    return this.users.update({ id: user.id }, updateUserInput);
   }
 
   remove(id: number) {
@@ -114,5 +130,16 @@ export class UserService {
       where: { id },
       relations: ['appointments', 'user'],
     });
+  }
+
+  async uploadFile(username: string, file: Express.Multer.File, name?: string) {
+    const bucket = admin
+      .storage()
+      .bucket()
+      .file(
+        `profiles/${username}/${name || file.filename + Date.now().toString()}`,
+      );
+    await bucket.save(file.buffer);
+    return bucket.publicUrl();
   }
 }

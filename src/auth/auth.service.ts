@@ -1,8 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../user/entities/user.entity';
+import { User, UserRole } from '../user/entities/user.entity';
 import { SignUpDto } from './dto/sign-up.dto';
 import { LoginPayload } from './dto/login.dto';
 
@@ -14,11 +19,12 @@ export class AuthService {
     private readonly config: ConfigService,
   ) {}
 
-  async register(signUp: SignUpDto): Promise<User> {
+  async register(
+    signUp: SignUpDto,
+    profile: Express.Multer.File,
+  ): Promise<User> {
+    signUp.profileUrl = profile;
     const user = await this.userService.create(signUp);
-    if (user instanceof HttpException) {
-      throw user;
-    }
 
     delete user.password;
 
@@ -34,6 +40,10 @@ export class AuthService {
       throw new HttpException('Cred does not match', HttpStatus.BAD_REQUEST);
     }
 
+    if (user.role === UserRole.doctor && !user.doctor.is_verified) {
+      throw new ConflictException('User is not verified');
+    }
+
     delete user.password;
 
     return user;
@@ -41,7 +51,7 @@ export class AuthService {
 
   async createToken(user: User) {
     return {
-      accessToken: this.jwtService.sign({ id: user.id }),
+      accessToken: this.jwtService.sign({ username: user.username }),
       user,
     };
   }

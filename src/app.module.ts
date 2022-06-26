@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ClinicModule } from './clinic/clinic.module';
+import { PostModule } from './post/post.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -41,6 +42,7 @@ import * as Joi from 'joi';
     AuthModule,
     UserModule,
     ClinicModule,
+    PostModule,
   ],
   controllers: [],
   providers: [],
