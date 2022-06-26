@@ -49,11 +49,11 @@ export class AuthService {
     return user;
   }
 
-  async createToken(user: User) {
-    return {
-      accessToken: this.jwtService.sign({ username: user.username }),
-      user,
-    };
+  createToken(user: User) {
+    return this.jwtService.sign({
+      username: user.username,
+      sub: user.email,
+    });
   }
 
   signToken(user: User): string {

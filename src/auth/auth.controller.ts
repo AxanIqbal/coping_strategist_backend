@@ -18,32 +18,30 @@ import { User, UserRole } from '../user/entities/user.entity';
 import { SignUpDto } from './dto/sign-up.dto';
 import { LoginPayload } from './dto/login.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { TokenInterceptor } from './interceptor/token.interceptor';
+import { AuthUser } from '../user/decorator/user.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
-@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @UseGuards(AuthGuard('local'))
   @Post('login')
+  @UseInterceptors(TokenInterceptor)
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() payload: LoginPayload,
-  ): Promise<{ accessToken: string; user: User }> {
-    const user = await this.authService.validateUser(payload);
-
-    return this.authService.createToken(user);
+  async login(@AuthUser() user: User): Promise<User> {
+    return user;
   }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('profile'))
+  @UseInterceptors(FileInterceptor('profile'), TokenInterceptor)
   async register(
     @Body() signUp: SignUpDto,
     @UploadedFile() profile: Express.Multer.File,
-  ): Promise<{ accessToken: string; user: User }> {
-    console.log(signUp);
-    const user = await this.authService.register(signUp, profile);
-    return this.authService.createToken(user);
+  ): Promise<User> {
+    return this.authService.register(signUp, profile);
   }
 
   @UseGuards(JwtAuthGuard)

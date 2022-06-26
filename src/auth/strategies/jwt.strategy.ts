@@ -10,12 +10,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly usersService: UserService,
     private readonly config: ConfigService,
   ) {
+    const extractJwtFromCookie = (req) => {
+      let token = null;
+      if (req && (req.cookies || req.signedCookies)) {
+        token = req.cookies['token'] || req.signedCookies['token'];
+      }
+      return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    };
+    console.log('the extraction', extractJwtFromCookie);
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: extractJwtFromCookie,
       ignoreExpiration: false,
       passReqToCallback: false,
       secretOrKey: config.get<string>('SECRET'),
     });
+  }
+
+  extractJwtFromCookie(req) {
+    let token = null;
+    if (req && req.cookies) {
+      token = req.cookies['jwt'];
+    }
+    return token;
   }
 
   async validate(payload: { username: string; sub: string }, done) {
