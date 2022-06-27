@@ -1,12 +1,8 @@
-import {
-  ConflictException,
-  Injectable,
-  MethodNotAllowedException,
-} from '@nestjs/common';
+import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from './entities/post.entity';
+import { Post, PostType } from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../user/entities/user.entity';
 
@@ -20,7 +16,7 @@ export class PostService {
     if (user.role !== UserRole.merchant) {
       throw new MethodNotAllowedException('Not a merchant');
     }
-    console.log(user);
+
     return this.postRepository.save(
       this.postRepository.create({
         ...createPostDto,
@@ -31,8 +27,16 @@ export class PostService {
     );
   }
 
-  findAll() {
-    return this.postRepository.find();
+  findAll(type: PostType) {
+    if (type) {
+      return this.postRepository.find({
+        where: { type },
+        relations: ['merchant.user'],
+      });
+    }
+    return this.postRepository.find({
+      relations: ['merchant.user'],
+    });
   }
 
   findOne(id: number) {

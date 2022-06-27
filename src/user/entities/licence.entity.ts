@@ -23,7 +23,9 @@ export class Licence {
   @IsString()
   state: string;
 
-  @OneToOne(() => DoctorEntity)
+  @OneToOne(() => DoctorEntity, (object) => object.licence, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   doctor: DoctorEntity;
 }

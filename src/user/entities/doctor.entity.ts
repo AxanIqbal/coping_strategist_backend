@@ -46,7 +46,7 @@ export class DoctorEntity extends BaseEntity {
   @IsString()
   about: string;
 
-  @OneToOne(() => Licence, { cascade: true })
+  @OneToOne(() => Licence, (object) => object.doctor, { cascade: true })
   @Type(() => Licence)
   @ValidateNested()
   licence: Licence;
