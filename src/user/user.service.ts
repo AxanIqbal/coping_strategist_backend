@@ -9,9 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { CreateFavDto } from './dto/create-fav.dto';
-import { ClinicService } from '../clinic/clinic.service';
 import { SignUpDto } from '../auth/dto/sign-up.dto';
-import { DoctorEntity } from './entities/doctor.entity';
 import admin from 'firebase-admin';
 import { Merchant } from './entities/merchant.entity';
 
@@ -19,11 +17,8 @@ import { Merchant } from './entities/merchant.entity';
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
-    @InjectRepository(DoctorEntity)
-    private readonly doctorEntityRepository: Repository<DoctorEntity>,
     @InjectRepository(Merchant)
     private readonly merchantRepository: Repository<Merchant>,
-    private readonly clinicService: ClinicService,
   ) {}
 
   async create(createUserInput: SignUpDto): Promise<User> {
@@ -123,13 +118,6 @@ export class UserService {
           throw new HttpException('Favorite Not Found', 404);
         }
       });
-  }
-
-  findOneDoctor(id: number) {
-    return this.doctorEntityRepository.findOne({
-      where: { id },
-      relations: ['appointments', 'user'],
-    });
   }
 
   async uploadFile(username: string, file: Express.Multer.File, name?: string) {

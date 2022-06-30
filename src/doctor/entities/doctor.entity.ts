@@ -6,7 +6,7 @@ import {
   OneToMany,
   OneToOne,
 } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 import { IsDate, IsString, ValidateNested } from 'class-validator';
 import { Clinic } from '../../clinic/entities/clinic.entity';
 import { Transform, Type } from 'class-transformer';
@@ -16,7 +16,7 @@ import { BaseEntity } from '../../common/entities/base.entity';
 import { Licence } from './licence.entity';
 
 @Entity()
-export class DoctorEntity extends BaseEntity {
+export class Doctor extends BaseEntity {
   @OneToOne(() => User, (object) => object.doctor, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;

@@ -5,16 +5,15 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   OneToOne,
 } from 'typeorm';
 import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
 import { Clinic } from '../../clinic/entities/clinic.entity';
-import { User } from './user.entity';
-import { IsEnum, IsInt, IsNumber } from 'class-validator';
+import { IsEnum, IsNumber } from 'class-validator';
 import { FileEntity } from './file.entity';
 import { Transform } from 'class-transformer';
+import { User } from '../../user/entities/user.entity';
 
 enum Ethnicity {
   'Black' = 'Black',

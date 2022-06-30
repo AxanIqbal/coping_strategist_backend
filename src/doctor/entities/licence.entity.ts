@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { DoctorEntity } from './doctor.entity';
+import { Doctor } from './doctor.entity';
 import { Transform } from 'class-transformer';
 import { IsNumber, IsString } from 'class-validator';
 
@@ -23,9 +23,9 @@ export class Licence {
   @IsString()
   state: string;
 
-  @OneToOne(() => DoctorEntity, (object) => object.licence, {
+  @OneToOne(() => Doctor, (object) => object.licence, {
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  doctor: DoctorEntity;
+  doctor: Doctor;
 }

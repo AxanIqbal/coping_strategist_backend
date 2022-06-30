@@ -1,17 +1,15 @@
 import {
-  Allow,
   IsDefined,
   IsEmail,
   IsEnum,
   IsNotEmpty,
-  IsUrl,
   MinLength,
   ValidateNested,
 } from 'class-validator';
 import { UserRole } from '../../user/entities/user.entity';
-import { DoctorEntity } from '../../user/entities/doctor.entity';
-import { Transform, Type } from 'class-transformer';
-import { Patient } from '../../user/entities/patient.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
+import { Type } from 'class-transformer';
+import { Patient } from '../../patient/entities/patient.entity';
 
 export class SignUpDto {
   @IsDefined()
@@ -31,9 +29,9 @@ export class SignUpDto {
   @IsEnum(UserRole)
   readonly role: UserRole;
 
-  @Type(() => DoctorEntity)
+  @Type(() => Doctor)
   @ValidateNested()
-  doctor?: DoctorEntity;
+  doctor?: Doctor;
 
   @Type(() => Patient)
   @ValidateNested()

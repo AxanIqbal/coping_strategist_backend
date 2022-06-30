@@ -1,5 +1,4 @@
 import {
-  AfterRemove,
   BeforeInsert,
   BeforeRemove,
   BeforeUpdate,
@@ -12,16 +11,15 @@ import {
   Allow,
   IsEmail,
   IsEnum,
-  IsFirebasePushId,
   IsString,
   IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { Exclude, Type } from 'class-transformer';
 import admin from 'firebase-admin';
-import { DoctorEntity } from './doctor.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { Patient } from './patient.entity';
+import { Patient } from '../../patient/entities/patient.entity';
 import { Merchant } from './merchant.entity';
 
 export enum UserRole {
@@ -54,10 +52,10 @@ export class User extends BaseEntity {
   @IsUrl()
   profileUrl: string | Express.Multer.File;
 
-  @OneToOne(() => DoctorEntity, (object) => object.user, { cascade: true })
-  @Type(() => DoctorEntity)
+  @OneToOne(() => Doctor, (object) => object.user, { cascade: true })
+  @Type(() => Doctor)
   @ValidateNested()
-  doctor?: DoctorEntity;
+  doctor?: Doctor;
 
   @OneToOne(() => Patient, (object) => object.user, { cascade: true })
   @Type(() => Patient)

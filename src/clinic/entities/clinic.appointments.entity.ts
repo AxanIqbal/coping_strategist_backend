@@ -1,11 +1,11 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { IsDate, IsDateString, IsString, Validate } from 'class-validator';
+import { IsDate } from 'class-validator';
 import { Clinic } from './clinic.entity';
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import * as moment from 'moment';
-import { DoctorEntity } from '../../user/entities/doctor.entity';
-import { Patient } from '../../user/entities/patient.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
+import { Patient } from '../../patient/entities/patient.entity';
 
 @Entity()
 export class ClinicAppointments extends BaseEntity {
@@ -17,11 +17,11 @@ export class ClinicAppointments extends BaseEntity {
   @ManyToOne(() => Patient, { onDelete: 'CASCADE', nullable: false })
   patient: Patient;
 
-  @ManyToOne(() => DoctorEntity, (object) => object.appointments, {
+  @ManyToOne(() => Doctor, (object) => object.appointments, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  doctor: DoctorEntity;
+  doctor: Doctor;
 
   @ManyToOne(() => Clinic, { nullable: true })
   clinic: Clinic;

@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { PostModule } from './post/post.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { PatientModule } from './patient/patient.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -43,6 +45,8 @@ import * as Joi from 'joi';
     UserModule,
     ClinicModule,
     PostModule,
+    DoctorModule,
+    PatientModule,
   ],
   controllers: [],
   providers: [],

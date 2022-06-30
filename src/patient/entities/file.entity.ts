@@ -4,6 +4,7 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  InsertEvent,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
@@ -16,7 +17,7 @@ import { Patient } from './patient.entity';
 export class FileEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   @IsUrl()
-  url: string | Express.Multer.File;
+  file: string | Express.Multer.File;
 
   @Column()
   @IsString()
@@ -29,7 +30,8 @@ export class FileEntity extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async uploadImage() {
-    if (typeof this.url !== 'string') {
+    if (typeof this.file !== 'string') {
+      console.log(this.patient);
       const bucket = admin
         .storage()
         .bucket()
@@ -38,9 +40,9 @@ export class FileEntity extends BaseEntity {
             this.createdAt + '-' + this.name
           }`,
         );
-      await bucket.save(this.url.buffer);
+      await bucket.save(this.file.buffer);
       await bucket.makePublic();
-      this.url = bucket.publicUrl();
+      this.file = bucket.publicUrl();
     }
   }
 

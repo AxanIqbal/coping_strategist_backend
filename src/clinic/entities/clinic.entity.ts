@@ -11,7 +11,7 @@ import { IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ClinicPicturesEntity } from './clinic.pictures.entity';
 import { ClinicAppointments } from './clinic.appointments.entity';
-import { DoctorEntity } from '../../user/entities/doctor.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 
 @Entity()
 export class Clinic {
@@ -35,8 +35,8 @@ export class Clinic {
   @IsString()
   details: string;
 
-  @OneToMany(() => DoctorEntity, (object) => object.clinic)
-  doctors: DoctorEntity[];
+  @OneToMany(() => Doctor, (object) => object.clinic)
+  doctors: Doctor[];
 
   // @OneToOne(() => ClinicTimings, (object) => object.clinic, {
   //   cascade: true,

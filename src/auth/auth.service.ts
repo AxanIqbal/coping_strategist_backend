@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async validateUser(login: LoginPayload): Promise<User> {
-    const user = await this.userService.findOne(login.username);
+    const user = await this.userService.findOne(login.username, true);
     if (!user) {
       throw new HttpException('User not found', 404);
     }
