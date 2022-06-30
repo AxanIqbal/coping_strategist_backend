@@ -89,37 +89,6 @@ export class UserService {
     });
   }
 
-  async addFav(user: User, favId: CreateFavDto) {
-    return this.users
-      .query(
-        `insert into "user_favorites_clinic"("userId", "clinicId") VALUES (${user.id}, ${favId.id})`,
-      )
-      .catch((reason) => {
-        if (reason.code === '23505') {
-          throw new ConflictException('Already Exists');
-        }
-        if (reason.code === '23503') {
-          throw new HttpException('Favorite Not Found', 404);
-        }
-      });
-  }
-
-  removeFav(user: User, favId: CreateFavDto) {
-    // const favorites = user.favorites.filter((value) => value.id === favId.id);
-    return this.users
-      .query(
-        `delete from "user_favorites_clinic" where "clinicId"=${favId.id} and "userId"=${user.id}`,
-      )
-      .catch((reason) => {
-        if (reason.code === '23505') {
-          throw new ConflictException('Already Exists');
-        }
-        if (reason.code === '23503') {
-          throw new HttpException('Favorite Not Found', 404);
-        }
-      });
-  }
-
   async uploadFile(username: string, file: Express.Multer.File, name?: string) {
     const bucket = admin
       .storage()

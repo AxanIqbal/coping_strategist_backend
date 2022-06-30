@@ -5,12 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { IsUserAlreadyExist } from './is-user-already-exist.validator';
 import { ClinicModule } from '../clinic/clinic.module';
-import { FavoriteController } from './favorite.controller';
 import { Merchant } from './entities/merchant.entity';
 
 @Module({
   imports: [ClinicModule, TypeOrmModule.forFeature([User, Merchant])],
-  controllers: [UserController, FavoriteController],
+  controllers: [UserController],
   providers: [UserService, IsUserAlreadyExist],
   exports: [UserService],
 })

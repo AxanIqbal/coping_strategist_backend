@@ -9,7 +9,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
 import { SessionSerializer } from './session.serializer';
-import { FavoriteController } from '../user/favorite.controller';
+import { FavoriteController } from '../patient/favorite.controller';
 
 @Module({
   imports: [
@@ -26,16 +26,7 @@ import { FavoriteController } from '../user/favorite.controller';
       },
     }),
   ],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    LocalStrategy,
-    SessionSerializer,
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-  ],
+  providers: [AuthService, JwtStrategy, LocalStrategy, SessionSerializer],
   controllers: [AuthController],
 })
 export class AuthModule {}

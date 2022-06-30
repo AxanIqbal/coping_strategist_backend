@@ -17,10 +17,12 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/decorator/user.decorator';
-import { User, UserRole } from '../user/entities/user.entity';
+import { User } from '../user/entities/user.entity';
+import { Roles } from '../auth/decorator/user-roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('patient')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
@@ -31,14 +33,12 @@ export class PatientController {
 
   @Post('file')
   @UseInterceptors(FileInterceptor('file'))
+  @Roles('client')
   createFile(
     @Body() createFileDto: CreateFileDto,
     @UploadedFile() file: Express.Multer.File,
     @AuthUser() user: User,
   ) {
-    if (user.role !== UserRole.client) {
-      throw new MethodNotAllowedException('Not a client');
-    }
     return this.patientService.createFile(createFileDto, file, user);
   }
 
@@ -48,14 +48,13 @@ export class PatientController {
   }
 
   @Get('file')
+  @Roles('client')
   getAllFiles(@AuthUser() user: User) {
-    if (user.role !== UserRole.client) {
-      throw new MethodNotAllowedException('Not a client');
-    }
     return this.patientService.getAllFiles(user);
   }
 
   @Get(':id')
+  @Roles('doctor')
   findOne(@Param('id') id: string) {
     return this.patientService.findOne(+id);
   }
