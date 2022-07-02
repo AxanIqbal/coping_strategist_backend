@@ -81,22 +81,4 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
-
-  getAllMyData(user: User) {
-    return this.users.findOne({
-      where: { id: user.id },
-      relations: ['favorites', 'appointments'],
-    });
-  }
-
-  async uploadFile(username: string, file: Express.Multer.File, name?: string) {
-    const bucket = admin
-      .storage()
-      .bucket()
-      .file(
-        `profiles/${username}/${name || file.filename + Date.now().toString()}`,
-      );
-    await bucket.save(file.buffer);
-    return bucket.publicUrl();
-  }
 }

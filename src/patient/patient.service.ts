@@ -39,7 +39,9 @@ export class PatientService {
   }
 
   getAllFiles(user: User) {
-    return this.fileRepository.find({ where: { patient: !user.patient } });
+    return this.fileRepository.find({
+      where: { patient: { id: user.patient.id } },
+    });
   }
 
   findAll() {
@@ -87,5 +89,12 @@ export class PatientService {
           throw new HttpException('Favorite Not Found', 404);
         }
       });
+  }
+
+  getAllFav(user: User) {
+    return this.patientRepository.find({
+      where: { id: user.patient.id },
+      relations: ['favorites'],
+    });
   }
 }

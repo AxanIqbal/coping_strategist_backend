@@ -1,4 +1,8 @@
-import { Injectable, MethodNotAllowedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  MethodNotAllowedException,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -32,10 +36,12 @@ export class PostService {
       return this.postRepository.find({
         where: { type },
         relations: ['merchant.user'],
+        order: { createdAt: 'DESC' },
       });
     }
     return this.postRepository.find({
       relations: ['merchant.user'],
+      order: { createdAt: 'DESC' },
     });
   }
 
@@ -47,7 +53,23 @@ export class PostService {
     return `This action updates a #${id} post`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: number, user: User) {
+    const posts = await this.findPost(user);
+    const index = posts.findIndex((value) => value.id === id);
+    if (index >= 0) {
+      return this.postRepository.remove(posts[index]);
+    } else {
+      throw new ConflictException('Not your post or Not Found');
+    }
+  }
+
+  findPost(user: User) {
+    return this.postRepository.find({
+      where: {
+        merchant: {
+          id: user.merchant.id,
+        },
+      },
+    });
   }
 }

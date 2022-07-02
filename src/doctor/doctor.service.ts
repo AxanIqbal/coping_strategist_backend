@@ -15,4 +15,11 @@ export class DoctorService {
       relations: ['appointments', 'user'],
     });
   }
+
+  getAll() {
+    return this.doctorEntityRepository.find({
+      where: { is_verified: true },
+      relations: ['user'],
+    });
+  }
 }

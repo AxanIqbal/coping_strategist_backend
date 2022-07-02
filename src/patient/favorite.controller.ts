@@ -34,4 +34,10 @@ export class FavoriteController {
   deleteFav(@Body() favId: CreateFavDto, @AuthUser() user: User) {
     return this.patientService.removeFav(user, favId);
   }
+
+  @Get()
+  @Roles('client')
+  getAllFav(@AuthUser() user: User) {
+    return this.patientService.getAllFav(user);
+  }
 }

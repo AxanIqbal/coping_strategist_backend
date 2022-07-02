@@ -18,15 +18,17 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthUser } from '../user/decorator/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { PostType } from './entities/post.entity';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorator/user-roles.decorator';
 
-@UseGuards(JwtAuthGuard)
 @Controller('post')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
+  @Roles('merchant')
   create(@Body() createPostDto: CreatePostDto, @AuthUser() user: User) {
     return this.postService.create(createPostDto, user);
   }
@@ -34,6 +36,12 @@ export class PostController {
   @Get()
   findAll(@Query('type') type?: PostType) {
     return this.postService.findAll(type);
+  }
+
+  @Get('all')
+  @Roles('merchant')
+  findPosts(@AuthUser() user: User) {
+    return this.postService.findPost(user);
   }
 
   @Get(':id')
@@ -47,7 +55,8 @@ export class PostController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  @Roles('merchant')
+  remove(@Param('id') id: string, @AuthUser() user: User) {
+    return this.postService.remove(+id, user);
   }
 }
