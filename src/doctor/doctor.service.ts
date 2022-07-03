@@ -44,7 +44,10 @@ export class DoctorService {
     }
     return this.doctorEntityRepository.find({
       where: { is_verified: true },
-      relations: ['user'],
+      relations: ['user', 'licence'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 }
