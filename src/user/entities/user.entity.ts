@@ -44,6 +44,10 @@ export class User extends BaseEntity {
   @Exclude()
   password: string;
 
+  @Column({ default: 'None' })
+  @IsString()
+  name: string;
+
   @Column({ type: 'enum', enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
@@ -70,6 +74,14 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   @Allow()
   token?: string;
+
+  @Column({ nullable: true })
+  @Allow()
+  country?: string;
+
+  @Column({ nullable: true })
+  @Allow()
+  province?: string;
 
   @BeforeInsert()
   @BeforeUpdate()

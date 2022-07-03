@@ -16,7 +16,32 @@ export class DoctorService {
     });
   }
 
-  getAll() {
+  getAll(search: string) {
+    if (search) {
+      const formattedQuery = search.trim().replace(/ /g, ' & ');
+      return this.doctorEntityRepository
+        .createQueryBuilder('doctor')
+        .leftJoinAndSelect('doctor.user', 'user')
+        .where(
+          `to_tsvector('english', user.name) @@ to_tsquery('english', :search)`,
+          {
+            search: `${formattedQuery}:*`,
+          },
+        )
+        .orWhere(
+          `to_tsvector('english', doctor.profession) @@ to_tsquery('english', :search)`,
+          {
+            search: `${formattedQuery}:*`,
+          },
+        )
+        .orWhere(
+          `to_tsvector('english', user.username) @@ to_tsquery('english', :search)`,
+          {
+            search: `${formattedQuery}:*`,
+          },
+        )
+        .getMany();
+    }
     return this.doctorEntityRepository.find({
       where: { is_verified: true },
       relations: ['user'],

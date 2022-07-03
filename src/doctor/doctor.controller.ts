@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,8 +18,8 @@ export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}
 
   @Get()
-  getAll(): Promise<Doctor[]> {
-    return this.doctorService.getAll();
+  getAll(@Query('search') search?: string): Promise<Doctor[]> {
+    return this.doctorService.getAll(search);
   }
 
   @Get(':id')
