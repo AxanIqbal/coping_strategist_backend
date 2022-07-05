@@ -10,10 +10,11 @@ import {
 } from 'typeorm';
 import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
 import { Clinic } from '../../clinic/entities/clinic.entity';
-import { IsEnum, IsNumber } from 'class-validator';
+import { Allow, IsEnum, IsNumber } from 'class-validator';
 import { FileEntity } from './file.entity';
 import { Transform } from 'class-transformer';
 import { User } from '../../user/entities/user.entity';
+import { Doctor } from '../../doctor/entities/doctor.entity';
 
 enum Ethnicity {
   'Black' = 'Black',
@@ -30,6 +31,11 @@ export class Patient extends BaseEntity {
   @ManyToMany(() => Clinic, { cascade: true })
   @JoinTable()
   favorites: Clinic[];
+
+  @ManyToMany(() => Doctor, (object) => object.subscribed)
+  @JoinTable()
+  @Allow()
+  subscribes: Doctor[];
 
   @OneToOne(() => User, (object) => object.patient, { onDelete: 'CASCADE' })
   @JoinColumn()

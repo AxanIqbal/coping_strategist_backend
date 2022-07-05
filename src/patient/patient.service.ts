@@ -1,5 +1,9 @@
 import { ConflictException, HttpException, Injectable } from '@nestjs/common';
-import { CreateFileDto, CreatePatientDto } from './dto/create-patient.dto';
+import {
+  CreateFileDto,
+  CreatePatientDto,
+  CreateSubscription,
+} from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FileEntity } from './entities/file.entity';
@@ -48,8 +52,11 @@ export class PatientService {
     return `This action returns all patient`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} patient`;
+  findOne(id: number, user: User) {
+    return this.patientRepository.findOne({
+      where: { subscribes: { id: user.doctor.id } },
+      relations: ['files'],
+    });
   }
 
   update(id: number, updatePatientDto: UpdatePatientDto) {
@@ -96,5 +103,31 @@ export class PatientService {
       where: { id: user.patient.id },
       relations: ['favorites'],
     });
+  }
+
+  subscribe(body: CreateSubscription, user: User) {
+    return this.patientRepository
+      .query(
+        `insert into "patient_subscribes_doctor"("patientId", "doctorId") VALUES (${user.patient.id}, ${body.id})`,
+      )
+      .catch((reason) => {
+        if (reason.code === '23505') {
+          return this.patientRepository
+            .query(
+              `delete from "patient_subscribes_doctor" where "doctorId"=${body.id} and "patientId"=${user.patient.id}`,
+            )
+            .catch((reason) => {
+              if (reason.code === '23505') {
+                throw new ConflictException('Already Exists');
+              }
+              if (reason.code === '23503') {
+                throw new HttpException('Subscription Not Found', 404);
+              }
+            });
+        }
+        if (reason.code === '23503') {
+          throw new HttpException('Subscription Not Found', 404);
+        }
+      });
   }
 }

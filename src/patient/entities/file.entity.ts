@@ -31,13 +31,13 @@ export class FileEntity extends BaseEntity {
   @BeforeUpdate()
   async uploadImage() {
     if (typeof this.file !== 'string') {
-      console.log(this.patient);
+      console.log('uploadImage', this.patient);
       const bucket = admin
         .storage()
         .bucket()
         .file(
           `profiles/${this.patient.user.username}/${
-            this.createdAt + '-' + this.name
+            Date.now() + '-' + this.name
           }`,
         );
       await bucket.save(this.file.buffer);

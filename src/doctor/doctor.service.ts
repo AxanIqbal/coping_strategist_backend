@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
+import { User, UserRole } from '../user/entities/user.entity';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class DoctorService {
@@ -9,11 +11,23 @@ export class DoctorService {
     @InjectRepository(Doctor)
     private readonly doctorEntityRepository: Repository<Doctor>,
   ) {}
-  findOneDoctor(id: number) {
-    return this.doctorEntityRepository.findOne({
+  async findOneDoctor(id: number, user: User) {
+    const doctor = await this.doctorEntityRepository.findOne({
       where: { id },
-      relations: ['appointments', 'user'],
+      relations: ['appointments', 'user', 'subscribed'],
     });
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor Not Found');
+    }
+
+    if (user.role === UserRole.client) {
+      doctor.subscribe = !!doctor?.subscribed.find(
+        (value) => value.id === user.patient.id,
+      );
+    }
+    delete doctor.subscribed;
+    return doctor;
   }
 
   getAll(search: string) {
@@ -48,6 +62,13 @@ export class DoctorService {
       order: {
         createdAt: 'DESC',
       },
+    });
+  }
+
+  getAllSubscribed(user: User) {
+    return this.doctorEntityRepository.findOne({
+      where: { id: user.doctor.id },
+      relations: ['subscribed.user'],
     });
   }
 }

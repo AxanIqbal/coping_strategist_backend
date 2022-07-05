@@ -10,9 +10,13 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { DoctorService } from './doctor.service';
 import { Doctor } from './entities/doctor.entity';
+import { AuthUser } from '../user/decorator/user.decorator';
+import { User } from '../user/entities/user.entity';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorator/user-roles.decorator';
 
 @Controller('doctor')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}
@@ -22,8 +26,14 @@ export class DoctorController {
     return this.doctorService.getAll(search);
   }
 
+  @Get('subscribed')
+  @Roles('doctor')
+  getAllSubscribed(@AuthUser() user: User) {
+    return this.doctorService.getAllSubscribed(user);
+  }
+
   @Get(':id')
-  async findOneDoctor(@Param('id') id: number): Promise<Doctor> {
-    return this.doctorService.findOneDoctor(id);
+  async findOneDoctor(@Param('id') id: number, @AuthUser() user: User) {
+    return this.doctorService.findOneDoctor(id, user);
   }
 }

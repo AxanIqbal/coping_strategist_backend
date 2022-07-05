@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  MethodNotAllowedException,
   Param,
   Patch,
   Post,
@@ -12,7 +11,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
-import { CreateFileDto, CreatePatientDto } from './dto/create-patient.dto';
+import {
+  CreateFileDto,
+  CreatePatientDto,
+  CreateSubscription,
+} from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -55,8 +58,8 @@ export class PatientController {
 
   @Get(':id')
   @Roles('doctor')
-  findOne(@Param('id') id: string) {
-    return this.patientService.findOne(+id);
+  findOne(@Param('id') id: string, @AuthUser() user: User) {
+    return this.patientService.findOne(+id, user);
   }
 
   @Patch(':id')
@@ -67,5 +70,11 @@ export class PatientController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.patientService.remove(+id);
+  }
+
+  @Post('subscribe')
+  @Roles('client')
+  subscribe(@Body() body: CreateSubscription, @AuthUser() user: User) {
+    return this.patientService.subscribe(body, user);
   }
 }

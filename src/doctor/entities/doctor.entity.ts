@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -14,6 +15,7 @@ import * as moment from 'moment';
 import { ClinicAppointments } from '../../clinic/entities/clinic.appointments.entity';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Licence } from './licence.entity';
+import { Patient } from '../../patient/entities/patient.entity';
 
 @Entity()
 export class Doctor extends BaseEntity {
@@ -25,15 +27,8 @@ export class Doctor extends BaseEntity {
   @JoinColumn()
   clinic: Clinic;
 
-  // @Column()
-  // @Transform((date) => moment(date.value, 'hh:mm A').toDate())
-  // @IsDate()
-  // timeFrom: Date;
-  //
-  // @Column()
-  // @IsDate()
-  // @Transform((date) => moment(date.value, 'hh:mm A').toDate())
-  // timeTo: Date;
+  @ManyToMany(() => Patient, (object) => object.subscribes)
+  subscribed: Patient[];
 
   @Column()
   @IsString()
@@ -53,4 +48,6 @@ export class Doctor extends BaseEntity {
 
   @Column('boolean', { default: false })
   is_verified: boolean;
+
+  subscribe: boolean;
 }
