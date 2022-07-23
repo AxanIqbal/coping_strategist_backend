@@ -39,12 +39,13 @@ export class AuthService {
     if (!(await user.checkPassword(login.password))) {
       throw new HttpException('Cred does not match', HttpStatus.BAD_REQUEST);
     }
+    delete user.password;
+
+    console.log(user);
 
     if (user.role === UserRole.doctor && !user.doctor.is_verified) {
       throw new ConflictException('User is not verified');
     }
-
-    delete user.password;
 
     return user;
   }

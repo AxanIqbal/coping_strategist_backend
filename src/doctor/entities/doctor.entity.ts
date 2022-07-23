@@ -25,7 +25,7 @@ export class Doctor extends BaseEntity {
 
   @ManyToOne(() => Clinic, (object) => object.doctors, { nullable: true })
   @JoinColumn()
-  clinic: Clinic;
+  clinic?: Clinic;
 
   @ManyToMany(() => Patient, (object) => object.subscribes)
   subscribed: Patient[];
