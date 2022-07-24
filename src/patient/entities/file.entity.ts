@@ -9,7 +9,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
-import { IsString, IsUrl } from 'class-validator';
+import { IsBoolean, IsString, IsUrl } from 'class-validator';
 import admin from 'firebase-admin';
 import { Patient } from './patient.entity';
 
@@ -27,11 +27,14 @@ export class FileEntity extends BaseEntity {
   @JoinColumn()
   patient: Patient;
 
+  @Column('bool', { default: false })
+  @IsBoolean()
+  assigned: boolean;
+
   @BeforeInsert()
   @BeforeUpdate()
   async uploadImage() {
     if (typeof this.file !== 'string') {
-      console.log('uploadImage', this.patient);
       const bucket = admin
         .storage()
         .bucket()
@@ -48,14 +51,16 @@ export class FileEntity extends BaseEntity {
 
   @BeforeRemove()
   async removeFile() {
-    const bucket = admin
-      .storage()
-      .bucket()
-      .file(
-        `profiles/${this.patient.user.username}/${
-          this.createdAt + '-' + this.name
-        }`,
-      );
-    await bucket.delete({ ignoreNotFound: true });
+    if (!this.assigned) {
+      const bucket = admin
+        .storage()
+        .bucket()
+        .file(
+          `profiles/${this.patient.user.username}/${
+            this.createdAt + '-' + this.name
+          }`,
+        );
+      await bucket.delete({ ignoreNotFound: true });
+    }
   }
 }

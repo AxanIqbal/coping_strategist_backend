@@ -6,10 +6,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { LocalStrategy } from './strategies/local.strategy';
-import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './guards/roles.guard';
 import { SessionSerializer } from './session.serializer';
-import { FavoriteController } from '../patient/favorite.controller';
 
 @Module({
   imports: [

@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import {
+  AssignFileDto,
   CreateFileDto,
   CreatePatientDto,
   CreateSubscription,
@@ -43,6 +44,12 @@ export class PatientController {
     @AuthUser() user: User,
   ) {
     return this.patientService.createFile(createFileDto, file, user);
+  }
+
+  @Post('assign')
+  @Roles('doctor')
+  assignFile(@Body() assignFileDto: AssignFileDto, @AuthUser() user: User) {
+    return this.patientService.assignFile(assignFileDto, user);
   }
 
   @Get()

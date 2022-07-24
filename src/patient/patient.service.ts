@@ -1,5 +1,11 @@
-import { ConflictException, HttpException, Injectable } from '@nestjs/common';
 import {
+  ConflictException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  AssignFileDto,
   CreateFileDto,
   CreatePatientDto,
   CreateSubscription,
@@ -11,6 +17,8 @@ import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { CreateFavDto } from '../user/dto/create-fav.dto';
 import { Patient } from './entities/patient.entity';
+import admin from 'firebase-admin';
+import { DoctorService } from '../doctor/doctor.service';
 
 @Injectable()
 export class PatientService {
@@ -19,6 +27,7 @@ export class PatientService {
     private readonly fileRepository: Repository<FileEntity>,
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
+    private readonly doctorService: DoctorService,
   ) {}
 
   create(createPatientDto: CreatePatientDto) {
@@ -105,16 +114,20 @@ export class PatientService {
     });
   }
 
-  subscribe(body: CreateSubscription, user: User) {
-    return this.patientRepository
+  async subscribe(body: CreateSubscription, user: User) {
+    const response = this.patientRepository
       .query(
-        `insert into "patient_subscribes_doctor"("patientId", "doctorId") VALUES (${user.patient.id}, ${body.id})`,
+        `insert into "patient_subscribes_doctor"("patientId", "doctorId")
+             VALUES (${user.patient.id}, ${body.id})`,
       )
       .catch((reason) => {
         if (reason.code === '23505') {
           return this.patientRepository
             .query(
-              `delete from "patient_subscribes_doctor" where "doctorId"=${body.id} and "patientId"=${user.patient.id}`,
+              `delete
+                     from "patient_subscribes_doctor"
+                     where "doctorId" = ${body.id}
+                       and "patientId" = ${user.patient.id}`,
             )
             .catch((reason) => {
               if (reason.code === '23505') {
@@ -129,5 +142,51 @@ export class PatientService {
           throw new HttpException('Subscription Not Found', 404);
         }
       });
+
+    const doctor = await this.doctorService.findOneDoctor(body.id, user);
+
+    await admin.messaging().send({
+      token: doctor.user.token,
+      data: {
+        notifee: JSON.stringify({
+          title: 'Patient Subscribed',
+          body: `${user.name} has subscribed to your profile`,
+          android: {
+            channelId: 'subscriptions',
+          },
+        }),
+      },
+    });
+
+    return response;
+  }
+
+  async assignFile(assignFileDto: AssignFileDto, user: User) {
+    const patient = user.doctor.subscribed.find(
+      (value) => value.id == assignFileDto.patient,
+    );
+    if (patient == undefined) {
+      throw new NotFoundException('Patient not found in subscription');
+    }
+
+    await admin.messaging().send({
+      token: patient.user.token,
+      data: {
+        notifee: JSON.stringify({
+          title: 'Assigned work',
+          body: `${user.name} has assigned a work to your profile`,
+          android: {
+            channelId: 'general',
+          },
+        }),
+      },
+    });
+
+    return this.fileRepository.save(
+      this.fileRepository.create({
+        ...assignFileDto,
+        patient,
+      }),
+    );
   }
 }
