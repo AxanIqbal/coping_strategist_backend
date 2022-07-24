@@ -162,10 +162,13 @@ export class PatientService {
   }
 
   async assignFile(assignFileDto: AssignFileDto, user: User) {
-    const patient = user.doctor.subscribed.find(
-      (value) => value.id == assignFileDto.patient,
+    const doctor = await this.doctorService.getAllSubscribed(user);
+
+    const patient = doctor.subscribed.find(
+      (value) => value.id === assignFileDto.patient,
     );
-    if (patient == undefined) {
+
+    if (patient === undefined) {
       throw new NotFoundException('Patient not found in subscription');
     }
 
