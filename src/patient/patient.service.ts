@@ -150,7 +150,7 @@ export class PatientService {
       data: {
         notifee: JSON.stringify({
           title: 'Patient Subscribed',
-          body: `${user.name} has subscribed to your profile`,
+          body: `${user.username} has subscribed to your profile`,
           android: {
             channelId: 'subscriptions',
           },
@@ -177,7 +177,7 @@ export class PatientService {
       data: {
         notifee: JSON.stringify({
           title: 'Assigned work',
-          body: `${user.name} has assigned a work to your profile`,
+          body: `${user.username} has assigned a work to your profile`,
           android: {
             channelId: 'general',
           },
@@ -189,6 +189,7 @@ export class PatientService {
       this.fileRepository.create({
         ...assignFileDto,
         patient,
+        assigned: true,
       }),
     );
   }
