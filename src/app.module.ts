@@ -27,19 +27,19 @@ import * as Joi from 'joi';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      synchronize: true,
+      synchronize: false,
       uuidExtension: 'pgcrypto',
       autoLoadEntities: true,
       logging: true,
-      ssl: process.env.NODE_ENV === 'production',
+      ssl: true,
       extra: {
-        ssl:
-          process.env.NODE_ENV === 'production'
-            ? {
-                rejectUnauthorized: false,
-              }
-            : false,
+        ssl: {
+          rejectUnauthorized: false,
+        },
       },
+      migrations: ['dist/migrations/*{.ts,.js}'],
+      migrationsTableName: 'migrations_typeorm',
+      migrationsRun: true,
     }),
     AuthModule,
     UserModule,
