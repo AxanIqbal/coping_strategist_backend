@@ -17,7 +17,7 @@ import { User } from '../../user/entities/user.entity';
 import { Doctor } from '../../doctor/entities/doctor.entity';
 
 enum Ethnicity {
-  'Black' = 'Black',
+  'Caucasian' = 'Caucasian',
   'African American' = 'African American',
   'Hispanic' = 'Hispanic',
   'Latino' = 'Latino',
