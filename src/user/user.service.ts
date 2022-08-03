@@ -81,4 +81,13 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+  getAllMerchants() {
+    return this.users.find({
+      where: {
+        role: UserRole.merchant,
+      },
+      relations: ['merchant'],
+    });
+  }
 }
