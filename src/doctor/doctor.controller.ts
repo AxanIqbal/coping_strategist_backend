@@ -1,8 +1,10 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
+  Post,
   Query,
   UseGuards,
   UseInterceptors,
@@ -14,6 +16,7 @@ import { AuthUser } from '../user/decorator/user.decorator';
 import { User } from '../user/entities/user.entity';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorator/user-roles.decorator';
+import { VerifyDto } from './dto/verify.dto';
 
 @Controller('doctor')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,6 +27,18 @@ export class DoctorController {
   @Get()
   getAll(@Query('search') search?: string): Promise<Doctor[]> {
     return this.doctorService.getAll(search);
+  }
+
+  @Get('unverified')
+  @Roles('admin')
+  getAllUnverified() {
+    return this.doctorService.getAllUnverified();
+  }
+
+  @Post('verify')
+  @Roles('admin')
+  verifyDoctor(@Body() id: VerifyDto) {
+    return this.doctorService.verifyDoctor(id);
   }
 
   @Get('subscribed')

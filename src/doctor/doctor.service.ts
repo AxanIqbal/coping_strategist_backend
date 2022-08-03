@@ -4,6 +4,7 @@ import { Doctor } from './entities/doctor.entity';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../user/entities/user.entity';
 import { NotFoundError } from 'rxjs';
+import { VerifyDto } from './dto/verify.dto';
 
 @Injectable()
 export class DoctorService {
@@ -65,10 +66,31 @@ export class DoctorService {
     });
   }
 
+  getAllUnverified() {
+    return this.doctorEntityRepository.find({
+      where: { is_verified: false },
+      relations: ['user', 'licence'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
   getAllSubscribed(user: User) {
     return this.doctorEntityRepository.findOne({
       where: { id: user.doctor.id },
       relations: ['subscribed.user'],
     });
+  }
+
+  verifyDoctor(id: VerifyDto) {
+    return this.doctorEntityRepository.update(
+      {
+        id: id.id,
+      },
+      {
+        is_verified: true,
+      },
+    );
   }
 }

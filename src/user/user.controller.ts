@@ -18,9 +18,11 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthUser } from './decorator/user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorator/user-roles.decorator';
 
 @Controller('user')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -28,6 +30,12 @@ export class UserController {
   @Get()
   findAll(): Promise<User[]> {
     return this.userService.findAll();
+  }
+
+  @Get('merchants')
+  @Roles('admin')
+  getAllMerchants() {
+    return this.userService.getAllMerchants();
   }
 
   @Get('me')
